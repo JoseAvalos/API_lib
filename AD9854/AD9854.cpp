@@ -34,7 +34,7 @@ static char *MODULATION[6] = {"None         ", "FSK          ", "Ramped FSK   ",
 int DDS::init()
 {
 
-    _ctrlreg_multiplier = 4;        	// Multiplier 4- 20
+    _ctrlreg_multiplier = 1;        	// Multiplier 4- 20
     _ctrlreg_mode = 0;              	// Single, FSK, Ramped FSK, Chirp, BPSK
     
     _ctrlreg_qdac_pwdn = 0;         	// QDAC power down enabled: 0 -> disable
@@ -62,6 +62,21 @@ int DDS::init()
 }
 
 
+int DDS::defaultSettings()
+{
+
+    wrMultiplier(4, _clock);
+    reset();
+    wrFrequency1(freq2binary(49920000));
+    wrFrequency2(freq2binary(10000000));
+
+    wrAmplitudeI(0.985);              
+    wrAmplitudeQ(0.985);                     
+    wrPhase1(180);                       
+    wrPhase2(180);                          
+    
+    return writeControlRegister();
+}
 
 int DDS::reset()
 {
@@ -81,16 +96,6 @@ int DDS::io_reset()
   	delayMicroseconds(_spi_delay);
 
 	return 1;
-}
-
-void DDS::on(int x) 
-{
-  digitalWrite(x, HIGH);
-}
-
-void DDS::off(int x) 
-{
-  digitalWrite(x, LOW);
 }
 
 char* DDS::readData(char addr, char ndata)
@@ -234,7 +239,7 @@ char* DDS::getControlRegister()
     controlRegister[0] = 0x10 + _ctrlreg_qdac_pwdn*4;
     controlRegister[1] = pll_range*64 + pll_bypass*32 + (_ctrlreg_multiplier & 0x1F);
     controlRegister[2] = (_ctrlreg_mode & 0x07)*2 + _ctrlreg_ioupdclk;
-    controlRegister[3] = _ctrlreg_inv_sinc*64 + _ctrlreg_osk_int*32 + _ctrlreg_osk_int*16 + _ctrlreg_msb_lsb*2 + _ctrlreg_sdo;
+    controlRegister[3] = _ctrlreg_inv_sinc*64 + _ctrlreg_osk_en*32 + _ctrlreg_osk_int*16 + _ctrlreg_msb_lsb*2 + _ctrlreg_sdo;
     
     return controlRegister;     
     
@@ -268,20 +273,30 @@ char* DDS::rdMultiplier()
     return rd_multiplier;    
 }
 
-char* DDS::rdPhase1()
+float DDS::rdPhase1()
 {
 
     char* rd_data;
     rd_data = readData(0x00, 2);
-    return rd_data;
+
+    float pha1=powf(2,8)*float(rd_data[0] & 0x3F)+int(rd_data[1] & 0xFF);
+
+    pha1=pha1*359/16383;
+
+    return pha1;
 }
 
-char* DDS::rdPhase2()
+float DDS::rdPhase2()
 {
  
     char* rd_data;
     rd_data = readData(0x01, 2);
-    return rd_data;
+    
+    float pha2=powf(2,8)*float(rd_data[0] & 0x3F)+int(rd_data[1] & 0xFF);
+
+    pha2=pha2*359/16383;
+
+    return pha2;
 }
 
 char* DDS::rdControl()
@@ -320,21 +335,30 @@ char* DDS::rdFrequency2()
 
 ///////////////////////
 
-char* DDS::rdAmplitudeI()
+float DDS::rdAmplitudeI()
 {
 
     char* rd_data;
     rd_data = readData(0x08, 2);
 	
-    return rd_data;
+    float I=powf(2,8)*float(rd_data[0] & 0x0F)+int(rd_data[1] & 0xFF);
+
+    I/=4095;
+
+    return I;
 }
 
-char* DDS::rdAmplitudeQ()
+float DDS::rdAmplitudeQ()
 {
 
     char* rd_data;
     rd_data = readData(0x09, 2);
-    return rd_data;
+    
+    float Q=powf(2,8)*float(rd_data[0] & 0x0F)+float(rd_data[1] & 0xFF);
+    
+    Q=Q/4095;
+
+    return Q;
 }
  
 int DDS::isRFEnabled()
@@ -361,16 +385,24 @@ int DDS::wrMultiplier(char multiplier, float clock)
     return writeControlRegister();
 }
 		
-int DDS::wrPhase1(char* phase)
+int DDS::wrPhase1(float phase)
 {
+    float phase1 = phase*16383/359; 
 
-    return writeDataAndVerify(0x00, 2, phase);
+    _phase1[0] = byte(int(phase1/256));
+    _phase1[1] = byte(int(phase1 - _phase1[0]*256));
+
+    return writeDataAndVerify(0x00, 2, _phase1);
 }
 	
-int DDS::wrPhase2(char* phase)
+int DDS::wrPhase2(float phase)
 {
-	
-    return writeDataAndVerify(0x01, 2, phase);
+    float phase2 = phase*16383/359; 
+
+    _phase2[0] = byte(int(phase2/256));
+    _phase2[1] = byte(int(phase2 - _phase2[0]*256));
+
+    return writeDataAndVerify(0x01, 2, _phase2);
 }
 	
 int DDS::wrFrequency1(char* freq)
@@ -401,22 +433,24 @@ int DDS::wrFrequency2(char* freq)
     return sts;
 }
 
-int DDS::wrAmplitudeI(char* amplitude)
+int DDS::wrAmplitudeI(float amplitude)
 {
-	
-    _amplitudeI[0] = amplitude[0];
-    _amplitudeI[1] = amplitude[1];
+	int amplitudeI = amplitude*4095; 
+
+    _amplitudeI[0] = byte(int(amplitudeI/256));
+    _amplitudeI[1] = byte(int(amplitudeI - _amplitudeI[0]*256));
 	
     _rf_enabled = true;
 	
-    return writeDataAndVerify(0x08, 2, amplitude);
+    return writeDataAndVerify(0x08, 2, _amplitudeI);
 }
  
-int DDS::wrAmplitudeQ(char* amplitude)
+int DDS::wrAmplitudeQ(float amplitude)
 {
+    int amplitudeQ = amplitude*4095;
 	
-    _amplitudeQ[0] = amplitude[0];
-    _amplitudeQ[1] = amplitude[1];
+    _amplitudeQ[0] = byte(int(amplitudeQ/256));
+    _amplitudeQ[1] = byte(int(amplitudeQ - _amplitudeQ[0]*256));
 	 
     _rf_enabled = true;
 	
@@ -442,22 +476,6 @@ int DDS::disableRF()
 	
 }
 	   
-int DDS::defaultSettings()
-{
-
-    wrMultiplier(1, 0.0);
-    wrAmplitudeI("\x0F\xC0");                //0xFC0 produces best SFDR than 0xFFF
-    wrAmplitudeQ("\x0F\xC0");                        //0xFC0 produces best SFDR than 0xFFF    
-    wrFrequency1("\x00\x00\x00\x00\x00\x00");        // 49.92 <> 0x3f 0xe5 0xc9 0x1d 0x14 0xe3 <> 49.92/clock*(2**48) \x3f\xe5\xc9\x1d\x14\xe3
-    wrFrequency2("\x00\x00\x00\x00\x00\x00");
-    wrPhase1("\x00\x00");                            //0 grados
-    wrPhase2("\x20\x00");                            //180 grados <> 0x20 0x00 <> 180/360*(2**14)
-    disableRF();
-		
-	return wrMode(4);                                //BPSK mode
-	
-}
-
 
 bool DDS::wasInitialized()
 {
@@ -522,6 +540,7 @@ char* DDS::freq2binary(float freq)
     static char bytevalue[6] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
 
     double DesiredOut = freq, SYSCLK = _clock;
+    DesiredOut=freq/_ctrlreg_multiplier;
     double a = 0, b = 256; // 2 bytes=16 bits
     a = DesiredOut * pow(2, 48)/ SYSCLK;
     
@@ -568,6 +587,15 @@ double DDS::binary2decimal(char* fb)
 }
 
 
+void DDS::on(int x) 
+{
+  digitalWrite(x, HIGH);
+}
+
+void DDS::off(int x) 
+{
+  digitalWrite(x, LOW);
+}
 
  /*
 ########################################################################

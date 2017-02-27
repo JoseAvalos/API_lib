@@ -79,7 +79,7 @@ int API::readcommand( EthernetClient client)
                         else if (httpRequest.getResource()[1] ==  "frequencyB_hz")
                         {
                         	a_0="{\"frequencyB_hz\":\"";
-                        	a_1=_DDS_JRO->binary2freq(_DDS_JRO->rdFrequency2())*_DDS_JRO->getMultiplier();
+                        	a_1=String(int(_DDS_JRO->binary2freq(_DDS_JRO->rdFrequency2())*_DDS_JRO->getMultiplier()));
 
                             httpReply.send(a_0+a_1+a_2);
                         }
@@ -87,7 +87,7 @@ int API::readcommand( EthernetClient client)
                         else if (httpRequest.getResource()[1] ==  "multiplier")
                         {
                             a_0="{\"multiplier\":\"";
-                        	a_1=String(_DDS_JRO->getMultiplier());
+                        	a_1=String(int(_DDS_JRO->getMultiplier()));
 
                             httpReply.send(a_0+a_1+a_2);
                         }
@@ -95,7 +95,7 @@ int API::readcommand( EthernetClient client)
                         else if (httpRequest.getResource()[1] ==  "frequencyA")
                         {
                             a_0="{\"frequencyA\":\"";
-                        	a_1=_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency2());
+                        	a_1=_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency1());
 
                             httpReply.send(a_0+a_1+a_2);
                         }
@@ -151,26 +151,6 @@ int API::readcommand( EthernetClient client)
                     *****************************************************/
                     else if (httpRequest.getResource()[0] == "status")
                     {
-                    	// String msg_status;
-
-                    	// JsonObject&  dds_status = jsonBuffer.createObject();
-                     //    dds_status["conection"] = "YES";
-                     //    dds_status["clock"]= _DDS_JRO->getclock() ;
-                     //    dds_status["frequencyA_hz"] =_DDS_JRO->binary2freq(_DDS_JRO->rdFrequency1())*_DDS_JRO->getMultiplier();
-                     //    dds_status["frequencyB_hz"] =_DDS_JRO->binary2freq(_DDS_JRO->rdFrequency2())*_DDS_JRO->getMultiplier();
-                     //    dds_status["multiplier"] =String(_DDS_JRO->getMultiplier());
-                     //    dds_status["frequencyA"] =_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency1());
-                     //    dds_status["frequencyB"] =_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency2());
-                     //    dds_status["phaseA_degrees"] =_DDS_JRO->rdPhase1();
-                     //    dds_status["phaseB_degrees"] =_DDS_JRO->rdPhase2();
-                     //    dds_status["amplitudeI"]=_DDS_JRO->rdAmplitudeI();
-                     //    dds_status["amplitudeQ"]=_DDS_JRO->rdAmplitudeQ();
-                        
-                        
-                     //    dds_status.printTo(msg_status);
-                     //    const String& msg_json = msg_status;
-                     //    httpReply.send(msg_json);
-
                 		String msg_status=status_DDS();
                         const String& msg_json = msg_status;
                         httpReply.send(msg_json);
@@ -195,33 +175,105 @@ int API::readcommand( EthernetClient client)
                     *****************************************************/
                     if (httpRequest.getResource()[0] == "write")
                     {
-         				// wrMultiplier(1, 0.0);
-					    // wrAmplitudeI("\x0F\xC0");                //0xFC0 produces best SFDR than 0xFFF
-					    // wrAmplitudeQ("\x0F\xC0");                        //0xFC0 produces best SFDR than 0xFFF    
-					    // wrFrequency1("\x00\x00\x00\x00\x00\x00");        // 49.92 <> 0x3f 0xe5 0xc9 0x1d 0x14 0xe3 <> 49.92/clock*(2**48) \x3f\xe5\xc9\x1d\x14\xe3
-					    // wrFrequency2("\x00\x00\x00\x00\x00\x00");
-					    // wrPhase1("\x00\x00");                            //0 grados
-					    // wrPhase2("\x20\x00");                            //180 grados <> 0x20 0x00 <> 180/360*(2**14)
-					    // disableRF();	
                         JsonObject& jsondata = jsonBuffer.parseObject(data);
                         
+                        // double _jsonclock=_DDS_JRO->clock(), _jsonmultiplier = _DDS_JRO->multiplier(), _jsonfrequency1  ;
+
+                        // if(jsondata.containsKey("clock"))
+                        // {
+                        //     _jsonclock = double(jsondata["clock"]);
+                        // }
+
+                        // if(jsondata.containsKey("multiplier"))
+                        // {
+                        //     _jsonmultiplier = double(jsondata["multiplier"]);
+                        // }
+
+                        // if(jsondata.containsKey("frequency1"))
+                        // {
+                        //     _jsonfrequency1 = double(jsondata["frequency1"]);
+                        // }
+
+
+                        // if(jsondata.containsKey("clock"))
+                        // {
+                        //     _jsonclock = double(jsondata["clock"]);
+                        // }
+
+
+
+                        // if(jsondata.containsKey("clock"))
+                        // {
+                        //     _jsonclock = double(jsondata["clock"]);
+                        // }
+                        
+
+                       
+
+                        // unsigned int modulation= int (jsondata["modulation"]);
+                        
+
+                        // double freq_1 = double(jsondata["frequency1"]);
+                        
+
+                        // double freq_2 = double(jsondata["frequency2"]);
+                        
+
+                        // float amplitudeI = float(jsondata["AmplitudeI"]);
+                        
+
+                        // float amplitudeQ = float(jsondata["AmplitudeQ"]);
+                        
+
+                        // float phaseA = float(jsondata["phaseA"]);
+                        
+
+                        // float phaseB = float(jsondata["phaseB"]);
+
+                        // if(clock<=300000000 && clock>=0) 
+                        // {
+                        //     if((mult>=4 && mult<=12) || mult=1)
+                        //     {
+                        //         if(modulation>=0 && modulation <=5)
+                        //         {
+                        //             if( freq_1 <= _DDS_JRO->getclock() * _DDS_JRO->getMultiplier())
+                        //             {
+                        //                 if( freq_2 <= _DDS_JRO->getclock() * _DDS_JRO->getMultiplier())
+                        //                 {
+
+                        //                 }
+
+                        //                 else
+                        //                 {
+                        //                     httpReply.send("{\"error\":\"Introduce a correct frequency2 \"}");
+                        //                 }
+                        //             }
+
+                        //             else
+                        //             {
+                        //                 httpReply.send("{\"error\":\"Introduce a correct frequency1 \"}");
+                        //             }
+                        //         }
+
+                        //         else
+                        //         {
+                        //             httpReply.send("{\"error\":\"Introduce a modulation case \"}");
+                        //         }
+                        //     }
+
+                        //     else
+                        //     {
+                        //         httpReply.send("{\"error\":\"Introduce a multiplier value from 4 to 12 or 1 \"}");
+                        //     }
+                        // }
+
+                        // else
+                        // {
+                        //     httpReply.send("{\"error\":\"Introduce a clock less than 300000000 \"}");
+                        // }
+                        //bool enable= bool (jsondata["enable"]);
+
                         double freq_1 = double(jsondata["frequency1"]);
-                        double freq_2 = double(jsondata["frequency2"]);
-                        double mult = double(jsondata["multiplier"]);
-                        double clock = double(jsondata["clock"]);
-                        char amplitudeI = char(jsondata["AmplitudeI"]);
-                        char amplitudeQ = char(jsondata["AmplitudeQ"]);
-                        char phaseA = char(jsondata["phaseA"]);
-                        char phaseB = char(jsondata["phaseB"]);
-
-                        wrMultiplier(mult, clock);
-                        wrPhase1("\x00\x00");                            //0 grados
-					    wrPhase2("\x20\x00");                            //180 grados <> 0x20 0x00 <> 180/360*(2**14)
-					    disableRF();	
-
-
-
-                        Serial.println(String(freq_1));
                         freq_1/=float(_DDS_JRO->getMultiplier());
                         
                         if(freq_1<=_DDS_JRO->getclock()/2)
@@ -235,17 +287,16 @@ int API::readcommand( EthernetClient client)
                         	httpReply.send("{\"error\":\"Frecuency 1 set is out of range, please change value (Mhz)\"}");
                         }
 
-                        if(freq_2<=_DDS_JRO->getclock()/2)
-                        {                   
-                            char* fb=_DDS_JRO->freq2binary(freq_2);
-                            _DDS_JRO->wrFrequency1(fb);
-                        }
+         //                if(freq_2<=_DDS_JRO->getclock()/2)
+         //                {                   
+         //                    char* fb=_DDS_JRO->freq2binary(freq_2);
+         //                    _DDS_JRO->wrFrequency1(fb);
+         //                }
                         
-                        else
-                        {
-                        	httpReply.send("{\"error\":\"Frecuency 2 set is out of range, please change value (Mhz)\"}");
-                        }
-
+         //                else
+         //                {
+         //                	httpReply.send("{\"error\":\"Frecuency 2 set is out of range, please change value (Mhz)\"}");
+         //                }
 
 
                         msg=4;
@@ -316,11 +367,12 @@ String API::status_DDS()
 	JsonObject&  dds_status = jsonBuffer.createObject();
     dds_status["conection"] = "YES";
     dds_status["clock"]= _DDS_JRO->getclock() ;
-    dds_status["frequencyA_hz"] =_DDS_JRO->binary2freq(_DDS_JRO->rdFrequency1())*_DDS_JRO->getMultiplier();
-    dds_status["frequencyB_hz"] =_DDS_JRO->binary2freq(_DDS_JRO->rdFrequency2())*_DDS_JRO->getMultiplier();
-    dds_status["multiplier"] =String(_DDS_JRO->getMultiplier());
-    dds_status["frequencyA"] =_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency1());
-    dds_status["frequencyB"] =_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency2());
+    dds_status["frequencyA_hz"] =String(_DDS_JRO->binary2freq(_DDS_JRO->rdFrequency1())*_DDS_JRO->getMultiplier());
+    dds_status["frequencyB_hz"] =String(_DDS_JRO->binary2freq(_DDS_JRO->rdFrequency2())*_DDS_JRO->getMultiplier());
+    dds_status["multiplier"] =int(_DDS_JRO->getMultiplier());
+    dds_status["frequencyA"] =String(_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency1()));
+    dds_status["frequencyB"] =String(_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency2()));
+    
     dds_status["phaseA_degrees"] =_DDS_JRO->rdPhase1();
     dds_status["phaseB_degrees"] =_DDS_JRO->rdPhase2();
     dds_status["amplitudeI"]=_DDS_JRO->rdAmplitudeI();
@@ -338,19 +390,19 @@ String API::status_DDS()
 
 {
   "amplitude_enabled": false, 
-  "frequencyB_Mhz": 0, 
-  "frequencyA": 29320310074026, 
-  "phaseA_degrees": 0.0, 
-  "clock": 60.0, 
-  "modulation": 4, 
-  "frequencyB": 0, 
-  "phaseA": 0, 
-  "phaseB": 0, 
-  "multiplier": 4, 
+  --"frequencyB_Mhz": 0, 
+  --"frequencyA": 29320310074026, 
+  --"phaseA_degrees": 0.0, 
+  --"clock": 60.0, 
+  --"modulation": 4, 
+  --"frequencyB": 0, 
+  --"phaseA": 0, 
+  --"phaseB": 0, 
+  --"multiplier": 4, 
   "device_id": 1, 
-  "amplitudeQ": 0, 
-  "phaseB_degrees": 0, 
-  "amplitudeI": 0, 
-  "frequencyA_Mhz": 24.99999999999943
+  --"amplitudeQ": 0, 
+  --"phaseB_degrees": 0, 
+  --"amplitudeI": 0, 
+  --"frequencyA_Mhz": 24.99999999999943
 }
 */
