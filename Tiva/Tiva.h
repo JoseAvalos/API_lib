@@ -11,6 +11,7 @@ class API
   public:
   	API(DDS*,IPAddress, byte[]);
   	int readcommand(EthernetClient);
+  	String status_DDS();
   private:  
   	DDS* _DDS_JRO;
 };

@@ -5,21 +5,21 @@
 #include <SPI.h>
 
 
-// #define SPI_BITS 8
-// #define SPI_MODE 0
-// #define SPI_FREQ 1000000
+#define SPI_BITS 8
+#define SPI_MODE 0
+#define SPI_FREQ 1000000
  
-// #define DDS_CMD_RESET       0X10
-// #define DDS_CMD_ENABLE_RF   0x11
-// #define DDS_CMD_MULTIPLIER  0X12
-// #define DDS_CMD_MODE        0x13
-// #define DDS_CMD_FREQUENCYA  0X14
-// #define DDS_CMD_FREQUENCYB  0x15
-// #define DDS_CMD_PHASEA      0X16
-// #define DDS_CMD_PHASEB      0x17
-// #define DDS_CMD_AMPLITUDE1  0X18
-// #define DDS_CMD_AMPLITUDE2  0x19
-// #define DDS_CMD_READ        0x8000
+#define DDS_CMD_RESET       0X10
+#define DDS_CMD_ENABLE_RF   0x11
+#define DDS_CMD_MULTIPLIER  0X12
+#define DDS_CMD_MODE        0x13
+#define DDS_CMD_FREQUENCYA  0X14
+#define DDS_CMD_FREQUENCYB  0x15
+#define DDS_CMD_PHASEA      0X16
+#define DDS_CMD_PHASEB      0x17
+#define DDS_CMD_AMPLITUDE1  0X18
+#define DDS_CMD_AMPLITUDE2  0x19
+#define DDS_CMD_READ        0x8000
  
 class DDS{
 	private:
