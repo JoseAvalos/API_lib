@@ -282,6 +282,7 @@ int API::readcommand( EthernetClient client)
                             _DDS_JRO->wrFrequency1(fb);
                         }
                         
+
                         else
                         {
                         	httpReply.send("{\"error\":\"Frecuency 1 set is out of range, please change value (Mhz)\"}");
@@ -377,7 +378,7 @@ String API::status_DDS()
     dds_status["phaseB_degrees"] =_DDS_JRO->rdPhase2();
     dds_status["amplitudeI"]=_DDS_JRO->rdAmplitudeI();
     dds_status["amplitudeQ"]=_DDS_JRO->rdAmplitudeQ();
-    
+    dds_status["mode"]=String(_DDS_JRO->rdMode());
     
     dds_status.printTo(msg);
 

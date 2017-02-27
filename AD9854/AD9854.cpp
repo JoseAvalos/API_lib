@@ -35,7 +35,7 @@ int DDS::init()
 {
 
     _ctrlreg_multiplier = 1;        	// Multiplier 4- 20
-    _ctrlreg_mode = 0;              	// Single, FSK, Ramped FSK, Chirp, BPSK
+    _ctrlreg_mode = 1;              	// Single, FSK, Ramped FSK, Chirp, BPSK
     
     _ctrlreg_qdac_pwdn = 0;         	// QDAC power down enabled: 0 -> disable
     _ctrlreg_ioupdclk = 0;          	// IO Update clock direction: 0 -> input,  1 -> output
@@ -66,6 +66,8 @@ int DDS::defaultSettings()
 {
 
     wrMultiplier(4, _clock);
+    //wrMode(1);
+
     reset();
     wrFrequency1(freq2binary(49920000));
     wrFrequency2(freq2binary(10000000));
@@ -74,7 +76,6 @@ int DDS::defaultSettings()
     wrAmplitudeQ(0.985);                     
     wrPhase1(180);                       
     wrPhase2(180);                          
-    
     return writeControlRegister();
 }
 
@@ -245,16 +246,16 @@ char* DDS::getControlRegister()
     
 }
 
-char* DDS::rdMode()
+int DDS::rdMode()
 {
 	
     char* rd_data;
-    char* rd_mode;
+    int rd_mode;
     char mode;
 	
     rd_data = readData(0x07, 4);
     mode = (rd_data[2] & 0x0E) >> 1;
-    rd_mode[0] = mode;
+    rd_mode = int(mode);
 	
     return rd_mode;
 }

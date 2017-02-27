@@ -83,7 +83,7 @@ class DDS{
 		char* readData(char, char);
 		int scanIOUpdate();
 		int find();
-		char* rdMode();
+		int rdMode();
 		char* rdMultiplier();
 		float rdPhase1();
 		float rdPhase2();
