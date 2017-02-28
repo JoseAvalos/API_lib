@@ -83,15 +83,25 @@ class DDS{
 		char* readData(char, char);
 		int scanIOUpdate();
 		int find();
-		int rdMode();
+		
+		char* rdMode();
 		char* rdMultiplier();
-		float rdPhase1();
-		float rdPhase2();
+		char* rdPhase1();
+		char* rdPhase2();
 		char* rdFrequency1();
 		char* rdFrequency2();
-		float rdAmplitudeI();
-		float rdAmplitudeQ();
+		char* rdAmplitudeI();
+		char* rdAmplitudeQ();
+		
 		float getclock();
+		float getPhase1();
+		float getPhase2();
+		float getAmplitudeI();
+		float getAmplitudeQ();
+		int getMultiplier();
+		int getMode();
+
+
 		int isRFEnabled();
 		int wrMode(char mode);
 		int wrMultiplier(char multiplier, float clock=200.0);
@@ -104,17 +114,20 @@ class DDS{
 		int enableRF();
 		int disableRF();
 		int defaultSettings();
+
+		
+
+		
 		char* setCommand(unsigned short cmd, char* payload, unsigned long payload_len);
 		char* getCmdAnswer();
 		unsigned long getCmdAnswerLen();
 		int setAllDevice(char* payload);
 		bool wasInitialized();
-		char getMultiplier();
 		double getFreqFactor1();
 		double getFreqFactor2();
-		char getMode();
 		char* getModeStr();
 		char* rdControl();
+
 		double binary2decimal(char*);
 		double binary2freq(char*) ;
 		char* freq2binary(float );

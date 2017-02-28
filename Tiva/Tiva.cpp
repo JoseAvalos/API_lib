@@ -13,7 +13,7 @@ using namespace std;
 #define POST_NUMBER 3
 
 StaticJsonBuffer<40000> jsonBuffer;
-
+String json_WRITE_ERROR;
 
 API::API(DDS* _DDS, IPAddress _ip, byte _mac[])
 {
@@ -151,9 +151,7 @@ int API::readcommand( EthernetClient client)
                     *****************************************************/
                     else if (httpRequest.getResource()[0] == "status")
                     {
-                		String msg_status=status_DDS();
-                        const String& msg_json = msg_status;
-                        httpReply.send(msg_json);
+                        httpReply.send(status_DDS());
                         msg=2;
                     }
                     /*******************************************************
@@ -177,41 +175,42 @@ int API::readcommand( EthernetClient client)
                     {
                         JsonObject& jsondata = jsonBuffer.parseObject(data);
                         
-                        double _jsonclock=_DDS_JRO->clock(), _jsonmultiplier = _DDS_JRO->multiplier();
+                        double _jsonclock=_DDS_JRO->getclock();
+                        int _jsonmultiplier = _DDS_JRO->getMultiplier();
                         double _jsonfrequency1 = _DDS_JRO->binary2freq(_DDS_JRO->rdFrequency1())*_DDS_JRO->getMultiplier();
                         double _jsonfrequency2 = _DDS_JRO->binary2freq(_DDS_JRO->rdFrequency2())*_DDS_JRO->getMultiplier();
 
-                        float _jsonamplitudeI=_DDS_JRO->rdAmplitudeI();
-    					float _jsonamplitudeQ=_DDS_JRO->rdAmplitudeQ();
-    					float _jsonphaseA_degrees =_DDS_JRO->rdPhase1();
-    					float _jsonphaseB_degrees =_DDS_JRO->rdPhase2();
+                        float _jsonamplitudeI=_DDS_JRO->getAmplitudeI();
+    					float _jsonamplitudeQ=_DDS_JRO->getAmplitudeQ();
+    					float _jsonphaseA =_DDS_JRO->getPhase1();
+    					float _jsonphaseB =_DDS_JRO->getPhase2();
 
-    					int _jsonmode=_DDS_JRO->rdMode();
+    					int _jsonmode=_DDS_JRO->getMode();
     					bool _jsonenable=_DDS_JRO->isRFEnabled();
 
                         if(jsondata.containsKey("clock"))
                             _jsonclock = double(jsondata["clock"]);
 
                         if(jsondata.containsKey("multiplier"))
-                            _jsonmultiplier = double(jsondata["multiplier"]);
+                            _jsonmultiplier = int(jsondata["multiplier"]);
 
-                        if(jsondata.containsKey("frequency1"))
+                        if(jsondata.containsKey("frequencyA_hz"))
                             _jsonfrequency1 = double(jsondata["frequency1"]);
 
-                        if(jsondata.containsKey("frequency2"))
+                        if(jsondata.containsKey("frequencyB_hz"))
                             _jsonfrequency2 = double(jsondata["frequency2"]);
 
-                        if(jsondata.containsKey("amplitudeI")
+                        if(jsondata.containsKey("amplitudeI"))
                         	_jsonamplitudeI=float(jsondata["amplitudeI"]);
 
-                        if(jsondata.containsKey("amplitudeQ")
+                        if(jsondata.containsKey("amplitudeQ"))
                         	_jsonamplitudeQ=float(jsondata["amplitudeQ"]);
 
                         if(jsondata.containsKey("phaseA"))
-                        	_jsonphaseA_degrees=float(jsondata["phaseA"]);
+                        	_jsonphaseA=float(jsondata["phaseA"]);
 
                         if(jsondata.containsKey("phaseB"))
-                        	_jsonphaseB_degrees=float(jsondata["phaseB"]);
+                        	_jsonphaseB=float(jsondata["phaseB"]);
 
                         if(jsondata.containsKey("mode"))
                         	_jsonmode=int(jsondata["mode"]);
@@ -219,104 +218,28 @@ int API::readcommand( EthernetClient client)
                         if(jsondata.containsKey("enable"))
                         	_jsonenable=bool(jsondata["enable"]);
 
-
-                        // if(jsondata.containsKey("clock"))
-                        // {
-                        //     _jsonclock = double(jsondata["clock"]);
-                        // }
                         
-
-                       
-
-                        // unsigned int modulation= int (jsondata["modulation"]);
-                        
-
-                        // double freq_1 = double(jsondata["frequency1"]);
-                        
-
-                        // double freq_2 = double(jsondata["frequency2"]);
-                        
-
-                        // float amplitudeI = float(jsondata["AmplitudeI"]);
-                        
-
-                        // float amplitudeQ = float(jsondata["AmplitudeQ"]);
-                        
-
-                        // float phaseA = float(jsondata["phaseA"]);
-                        
-
-                        // float phaseB = float(jsondata["phaseB"]);
-
-                        // if(clock<=300000000 && clock>=0) 
-                        // {
-                        //     if((mult>=4 && mult<=12) || mult=1)
-                        //     {
-                        //         if(modulation>=0 && modulation <=5)
-                        //         {
-                        //             if( freq_1 <= _DDS_JRO->getclock() * _DDS_JRO->getMultiplier())
-                        //             {
-                        //                 if( freq_2 <= _DDS_JRO->getclock() * _DDS_JRO->getMultiplier())
-                        //                 {
-
-                        //                 }
-
-                        //                 else
-                        //                 {
-                        //                     httpReply.send("{\"error\":\"Introduce a correct frequency2 \"}");
-                        //                 }
-                        //             }
-
-                        //             else
-                        //             {
-                        //                 httpReply.send("{\"error\":\"Introduce a correct frequency1 \"}");
-                        //             }
-                        //         }
-
-                        //         else
-                        //         {
-                        //             httpReply.send("{\"error\":\"Introduce a modulation case \"}");
-                        //         }
-                        //     }
-
-                        //     else
-                        //     {
-                        //         httpReply.send("{\"error\":\"Introduce a multiplier value from 4 to 12 or 1 \"}");
-                        //     }
-                        // }
-
-                        // else
-                        // {
-                        //     httpReply.send("{\"error\":\"Introduce a clock less than 300000000 \"}");
-                        // }
-                        //bool enable= bool (jsondata["enable"]);
-
-                        double freq_1 = double(jsondata["frequency1"]);
-                        freq_1/=float(_DDS_JRO->getMultiplier());
-                        
-                        if(freq_1<=_DDS_JRO->getclock()/2)
-                        {                   
-                            char* fb=_DDS_JRO->freq2binary(freq_1);
-                            _DDS_JRO->wrFrequency1(fb);
-                        }
-                        
-
-                        else
+                        if(validation(_jsonclock,_jsonmultiplier, _jsonfrequency1, _jsonfrequency2,_jsonamplitudeI,_jsonamplitudeQ,_jsonphaseA,_jsonphaseB, _jsonmode))
                         {
-                        	httpReply.send("{\"error\":\"Frecuency 1 set is out of range, please change value (Mhz)\"}");
+                            _DDS_JRO->wrMultiplier(_jsonmultiplier,_jsonclock);
+                            _DDS_JRO->wrPhase1(_jsonphaseA);
+                            _DDS_JRO->wrPhase2(_jsonphaseB);
+                            _DDS_JRO->wrAmplitudeI(_jsonamplitudeI);
+                            _DDS_JRO->wrAmplitudeQ(_jsonamplitudeQ);
+                            _DDS_JRO->wrMode(_jsonmode);
+
+                            _DDS_JRO->wrFrequency1(_DDS_JRO->freq2binary(_jsonfrequency1));
+                            _DDS_JRO->wrFrequency2(_DDS_JRO->freq2binary(_jsonfrequency2));
+
+                            httpReply.send(status_DDS());
+
                         }
 
-         //                if(freq_2<=_DDS_JRO->getclock()/2)
-         //                {                   
-         //                    char* fb=_DDS_JRO->freq2binary(freq_2);
-         //                    _DDS_JRO->wrFrequency1(fb);
-         //                }
+                        else{
+                            httpReply.send(json_WRITE_ERROR);
+                        }
                         
-         //                else
-         //                {
-         //                	httpReply.send("{\"error\":\"Frecuency 2 set is out of range, please change value (Mhz)\"}");
-         //                }
-
+                        
 
                         msg=4;
                     }
@@ -325,8 +248,8 @@ int API::readcommand( EthernetClient client)
                     *****************************************************/
                     else if (httpRequest.getResource()[0] == "start")
                     {
-                        //_DDS_JRO->
-                        httpReply.send("{\"start\":\"ok\"}");
+                        _DDS_JRO->enableRF();
+                        httpReply.send(status_DDS());
                         msg=5;
                     }
                     /*******************************************************
@@ -336,7 +259,7 @@ int API::readcommand( EthernetClient client)
                     {
                         //_DDS_JRO->reset();
                         _DDS_JRO->disableRF();
-                        httpReply.send("{\"stop\":\"ok\"}");
+                        httpReply.send(status_DDS());
                         msg=6;
                     }
                     /*******************************************************
@@ -344,7 +267,7 @@ int API::readcommand( EthernetClient client)
                     *****************************************************/
                     else
                     {
-                        httpReply.send("{\"error\":\"METHOD POST DON'T IDENTIFIED\"}");
+                        httpReply.send("{\"error\":\"RESOURCE POST DON'T IDENTIFIED\"}");
                         msg=7;
                     }
                 }
@@ -384,6 +307,7 @@ String API::status_DDS()
 	String msg;
 
 	JsonObject&  dds_status = jsonBuffer.createObject();
+
     dds_status["conection"] = "YES";
     dds_status["clock"]= _DDS_JRO->getclock() ;
     dds_status["frequencyA_hz"] =String(_DDS_JRO->binary2freq(_DDS_JRO->rdFrequency1())*_DDS_JRO->getMultiplier());
@@ -392,11 +316,11 @@ String API::status_DDS()
     dds_status["frequencyA"] =String(_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency1()));
     dds_status["frequencyB"] =String(_DDS_JRO->binary2decimal(_DDS_JRO->rdFrequency2()));
     
-    dds_status["phaseA_degrees"] =_DDS_JRO->rdPhase1();
-    dds_status["phaseB_degrees"] =_DDS_JRO->rdPhase2();
-    dds_status["amplitudeI"]=_DDS_JRO->rdAmplitudeI();
-    dds_status["amplitudeQ"]=_DDS_JRO->rdAmplitudeQ();
-    dds_status["mode"]=String(_DDS_JRO->rdMode());
+    dds_status["phaseA_degrees"] =_DDS_JRO->getPhase1();
+    dds_status["phaseB_degrees"] =_DDS_JRO->getPhase2();
+    dds_status["amplitudeI"]=_DDS_JRO->getAmplitudeI();
+    dds_status["amplitudeQ"]=_DDS_JRO->getAmplitudeQ();
+    dds_status["mode"]=String(_DDS_JRO->getMode());
     
     dds_status.printTo(msg);
 
@@ -404,4 +328,83 @@ String API::status_DDS()
     return msg;
 }
 
+int API::validation(double _vclock, int _vmultiplier, double _vfrequency1, double _vfrequency2, float _vamplitudeI, float _vamplitudeQ, float _vphaseA, float _vphaseB, int _vmode)
+{
+    int sucess = 0;
 
+    if(_vclock<=300000000 && _vclock>=0) 
+    {
+        if((_vmultiplier>=4 && _vmultiplier<=20) || _vmultiplier==1)
+        {
+            if(_vmode>=0 && _vmode <=5)
+            {
+                if( _vfrequency1 <= _DDS_JRO->getclock() * _DDS_JRO->getMultiplier() * 0.5)
+                {
+                    if( _vfrequency2 <= _DDS_JRO->getclock() * _DDS_JRO->getMultiplier() * 0.5)
+                    {
+                        if( _vamplitudeI <= 1 && _vamplitudeI >=0)
+                        {
+                            if( _vamplitudeQ<= 1 && _vamplitudeQ >=0)
+                            {
+                               if( _vphaseA <= 360 && _vphaseA >=0)
+                                {
+                                    if( _vphaseB <= 360 && _vphaseB >=0)
+                                    {
+                                        sucess=1;
+                                    }
+
+                                    else
+                                    {
+                                        json_WRITE_ERROR="{\"error\":\"Introduce a phaseA between 0 and 1 \"}";
+                                    }
+                                }
+
+                                else
+                                {
+                                    json_WRITE_ERROR="{\"error\":\"Introduce a phaseA between 0 and 1 \"}";
+                                } 
+                            }
+
+                            else
+                            {
+                                json_WRITE_ERROR="{\"error\":\"Introduce an amplitudeQ between 0 and 1 \"}";
+                            }
+                        }
+
+                        else
+                        {
+                            json_WRITE_ERROR="{\"error\":\"Introduce an amplitudeI between 0 and 1 \"}";
+                        }
+                    }
+
+                    else
+                    {
+                        json_WRITE_ERROR="{\"error\":\"Introduce a correct frequency2 \"}";
+                    }
+                }
+
+                else
+                {
+                    json_WRITE_ERROR="{\"error\":\"Introduce a correct frequency1 \"}";
+                }
+            }
+
+            else
+            {
+                json_WRITE_ERROR="{\"error\":\"Introduce a modulation case \"}";
+            }
+        }
+
+        else
+        {
+            json_WRITE_ERROR="{\"error\":\"Introduce a multiplier value from 4 to 20 or 1 \"}";
+        }
+    }
+
+    else
+    {
+        json_WRITE_ERROR="{\"error\":\"Introduce a clock less than 300000000 \"}";
+    }
+
+    return sucess;
+}

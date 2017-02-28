@@ -34,8 +34,8 @@ static char *MODULATION[6] = {"None         ", "FSK          ", "Ramped FSK   ",
 int DDS::init()
 {
 
-    _ctrlreg_multiplier = 1;        	// Multiplier 4- 20
-    _ctrlreg_mode = 1;              	// Single, FSK, Ramped FSK, Chirp, BPSK
+    _ctrlreg_multiplier = 4;        	// Multiplier 4- 20
+    _ctrlreg_mode = 0;              	// Single, FSK, Ramped FSK, Chirp, BPSK
     
     _ctrlreg_qdac_pwdn = 0;         	// QDAC power down enabled: 0 -> disable
     _ctrlreg_ioupdclk = 0;          	// IO Update clock direction: 0 -> input,  1 -> output
@@ -65,18 +65,21 @@ int DDS::init()
 int DDS::defaultSettings()
 {
 
+    wrAmplitudeI(0.98);              
+    wrAmplitudeQ(0.98);
+    disableRF();
+
     wrMultiplier(4, _clock);
     reset();
 
     wrFrequency1(freq2binary(49920000));
     wrFrequency2(freq2binary(10000000));
 
-    wrAmplitudeI(0.0);              
-    wrAmplitudeQ(0.0);
-
     wrPhase1(180);                       
     wrPhase2(180);
-                              
+                     
+    
+
     return writeControlRegister();
 }
 
@@ -230,7 +233,7 @@ char* DDS::getControlRegister()
     bool pll_range = 0;
     bool pll_bypass = 1;
     
-    if (_ctrlreg_multiplier >= 4 && _ctrlreg_multiplier<=12){
+    if (_ctrlreg_multiplier >= 4 && _ctrlreg_multiplier<=20){
         pll_bypass = 0;
     }
  
@@ -247,7 +250,7 @@ char* DDS::getControlRegister()
     
 }
 
-int DDS::rdMode()
+char* DDS::rdMode()
 {
 	
     char* rd_data;
@@ -256,11 +259,15 @@ int DDS::rdMode()
 	
     rd_data = readData(0x07, 4);
     mode = (rd_data[2] & 0x0E) >> 1;
-    rd_mode = int(mode);
+    
+    _ctrlreg_mode=mode;
+
+    rd_data[0] = mode;
 	
-    return rd_mode;
+    return rd_data;
 }
-	
+
+
 char* DDS::rdMultiplier()
 {
 	
@@ -275,11 +282,20 @@ char* DDS::rdMultiplier()
     return rd_multiplier;    
 }
 
-float DDS::rdPhase1()
+char* DDS::rdPhase1()
 {
 
     char* rd_data;
     rd_data = readData(0x00, 2);
+    return rd_data;
+}
+
+
+float DDS::getPhase1()
+{
+
+    char* rd_data;
+    rd_data = rdPhase1();
 
     float pha1=powf(2,8)*float(rd_data[0] & 0x3F)+int(rd_data[1] & 0xFF);
 
@@ -288,11 +304,20 @@ float DDS::rdPhase1()
     return pha1;
 }
 
-float DDS::rdPhase2()
+char* DDS::rdPhase2()
 {
  
     char* rd_data;
     rd_data = readData(0x01, 2);
+
+    return rd_data;
+}
+
+float DDS::getPhase2()
+{
+ 
+    char* rd_data;
+    rd_data = rdPhase2();
     
     float pha2=powf(2,8)*float(rd_data[0] & 0x3F)+int(rd_data[1] & 0xFF);
 
@@ -337,32 +362,50 @@ char* DDS::rdFrequency2()
 
 ///////////////////////
 
-float DDS::rdAmplitudeI()
+char* DDS::rdAmplitudeI()
 {
 
     char* rd_data;
     rd_data = readData(0x08, 2);
-	
-    float I=powf(2,8)*float(rd_data[0] & 0x0F)+int(rd_data[1] & 0xFF);
 
-    I/=4095;
-
-    return I;
+    return rd_data;
 }
 
-float DDS::rdAmplitudeQ()
+float DDS::getAmplitudeI()
+{
+
+    char* rd_data;
+    rd_data = rdAmplitudeI();
+    
+    float rd_value=powf(2,8)*float(rd_data[0] & 0x0F)+int(rd_data[1] & 0xFF);
+
+    rd_value/=4095;
+
+    return rd_value;
+}
+
+char* DDS::rdAmplitudeQ()
 {
 
     char* rd_data;
     rd_data = readData(0x09, 2);
     
-    float Q=powf(2,8)*float(rd_data[0] & 0x0F)+float(rd_data[1] & 0xFF);
-    
-    Q=Q/4095;
-
-    return Q;
+    return rd_data;
 }
  
+float DDS::getAmplitudeQ()
+{
+
+    char* rd_data;
+    rd_data = rdAmplitudeQ();
+    
+    float rd_value=powf(2,8)*float(rd_data[0] & 0x0F)+float(rd_data[1] & 0xFF);
+    
+    rd_value/=4095;
+
+    return rd_value;
+}
+
 int DDS::isRFEnabled()
 {
 	
@@ -463,6 +506,10 @@ int DDS::enableRF()
 {
 	
     _rf_enabled = true;
+    
+    if(_amplitudeI[0]==0x00 && _amplitudeI[1]==0x00  )
+        wrAmplitudeI(0.98);
+
     writeDataAndVerify(0x08, 2, _amplitudeI);
 
     return writeDataAndVerify(0x09, 2, _amplitudeQ);
@@ -485,12 +532,14 @@ bool DDS::wasInitialized()
     return _isConfig;
 }
  
-char DDS::getMultiplier()
+int DDS::getMultiplier()
 {
-    if(_ctrlreg_multiplier<4 || _ctrlreg_multiplier >12)
+    if(_ctrlreg_multiplier<4 || _ctrlreg_multiplier >20)
         _ctrlreg_multiplier=1;
 
-    return _ctrlreg_multiplier;
+    int mult= int (_ctrlreg_multiplier);
+
+    return mult;
 }
  
 double DDS::getFreqFactor1()
@@ -509,10 +558,10 @@ double DDS::getFreqFactor2(){
     return _factor_freq2;
 }
  
-char DDS::getMode()
+int DDS::getMode()
 {
-
-    return _ctrlreg_mode;   
+    int get_mode= int(_ctrlreg_mode);
+    return get_mode;   
 }
  
 char* DDS::getModeStr()

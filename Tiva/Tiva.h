@@ -12,6 +12,7 @@ class API
   	API(DDS*,IPAddress, byte[]);
   	int readcommand(EthernetClient);
   	String status_DDS();
+  	int validation(double, int , double , double , float , float , float , float , int);
   private:  
   	DDS* _DDS_JRO;
 };
