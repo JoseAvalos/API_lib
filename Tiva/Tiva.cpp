@@ -177,29 +177,47 @@ int API::readcommand( EthernetClient client)
                     {
                         JsonObject& jsondata = jsonBuffer.parseObject(data);
                         
-                        // double _jsonclock=_DDS_JRO->clock(), _jsonmultiplier = _DDS_JRO->multiplier(), _jsonfrequency1  ;
+                        double _jsonclock=_DDS_JRO->clock(), _jsonmultiplier = _DDS_JRO->multiplier();
+                        double _jsonfrequency1 = _DDS_JRO->binary2freq(_DDS_JRO->rdFrequency1())*_DDS_JRO->getMultiplier();
+                        double _jsonfrequency2 = _DDS_JRO->binary2freq(_DDS_JRO->rdFrequency2())*_DDS_JRO->getMultiplier();
 
-                        // if(jsondata.containsKey("clock"))
-                        // {
-                        //     _jsonclock = double(jsondata["clock"]);
-                        // }
+                        float _jsonamplitudeI=_DDS_JRO->rdAmplitudeI();
+    					float _jsonamplitudeQ=_DDS_JRO->rdAmplitudeQ();
+    					float _jsonphaseA_degrees =_DDS_JRO->rdPhase1();
+    					float _jsonphaseB_degrees =_DDS_JRO->rdPhase2();
 
-                        // if(jsondata.containsKey("multiplier"))
-                        // {
-                        //     _jsonmultiplier = double(jsondata["multiplier"]);
-                        // }
+    					int _jsonmode=_DDS_JRO->rdMode();
+    					bool _jsonenable=_DDS_JRO->isRFEnabled();
 
-                        // if(jsondata.containsKey("frequency1"))
-                        // {
-                        //     _jsonfrequency1 = double(jsondata["frequency1"]);
-                        // }
+                        if(jsondata.containsKey("clock"))
+                            _jsonclock = double(jsondata["clock"]);
 
+                        if(jsondata.containsKey("multiplier"))
+                            _jsonmultiplier = double(jsondata["multiplier"]);
 
-                        // if(jsondata.containsKey("clock"))
-                        // {
-                        //     _jsonclock = double(jsondata["clock"]);
-                        // }
+                        if(jsondata.containsKey("frequency1"))
+                            _jsonfrequency1 = double(jsondata["frequency1"]);
 
+                        if(jsondata.containsKey("frequency2"))
+                            _jsonfrequency2 = double(jsondata["frequency2"]);
+
+                        if(jsondata.containsKey("amplitudeI")
+                        	_jsonamplitudeI=float(jsondata["amplitudeI"]);
+
+                        if(jsondata.containsKey("amplitudeQ")
+                        	_jsonamplitudeQ=float(jsondata["amplitudeQ"]);
+
+                        if(jsondata.containsKey("phaseA"))
+                        	_jsonphaseA_degrees=float(jsondata["phaseA"]);
+
+                        if(jsondata.containsKey("phaseB"))
+                        	_jsonphaseB_degrees=float(jsondata["phaseB"]);
+
+                        if(jsondata.containsKey("mode"))
+                        	_jsonmode=int(jsondata["mode"]);
+
+                        if(jsondata.containsKey("enable"))
+                        	_jsonenable=bool(jsondata["enable"]);
 
 
                         // if(jsondata.containsKey("clock"))
@@ -387,23 +405,3 @@ String API::status_DDS()
 }
 
 
-/*
-
-{
-  "amplitude_enabled": false, 
-  --"frequencyB_Mhz": 0, 
-  --"frequencyA": 29320310074026, 
-  --"phaseA_degrees": 0.0, 
-  --"clock": 60.0, 
-  --"modulation": 4, 
-  --"frequencyB": 0, 
-  --"phaseA": 0, 
-  --"phaseB": 0, 
-  --"multiplier": 4, 
-  "device_id": 1, 
-  --"amplitudeQ": 0, 
-  --"phaseB_degrees": 0, 
-  --"amplitudeI": 0, 
-  --"frequencyA_Mhz": 24.99999999999943
-}
-*/

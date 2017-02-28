@@ -43,7 +43,7 @@ int DDS::init()
     _ctrlreg_osk_en = 1;            	// Enable Amplitude multiplier: 0 -> disabled
     _ctrlreg_osk_int = 0;           	// register/counter output shaped control: 0 -> register, 1 -> counter
     _ctrlreg_msb_lsb = 0;           	// msb/lsb bit first: 0 -> MSB, 1 -> LSB
-    _ctrlreg_sdo = 1;               	// SDO pin active: 0 -> inactive
+    _ctrlreg_sdo = 1;               	//     
      
     
     reset();
@@ -66,16 +66,17 @@ int DDS::defaultSettings()
 {
 
     wrMultiplier(4, _clock);
-    //wrMode(1);
-
     reset();
+
     wrFrequency1(freq2binary(49920000));
     wrFrequency2(freq2binary(10000000));
 
-    wrAmplitudeI(0.985);              
-    wrAmplitudeQ(0.985);                     
+    wrAmplitudeI(0.0);              
+    wrAmplitudeQ(0.0);
+
     wrPhase1(180);                       
-    wrPhase2(180);                          
+    wrPhase2(180);
+                              
     return writeControlRegister();
 }
 
