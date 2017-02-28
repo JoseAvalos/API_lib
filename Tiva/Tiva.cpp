@@ -15,6 +15,8 @@ using namespace std;
 StaticJsonBuffer<40000> jsonBuffer;
 String json_WRITE_ERROR;
 
+
+
 API::API(DDS* _DDS, IPAddress _ip, byte _mac[])
 {
     _DDS_JRO=_DDS;
@@ -169,9 +171,39 @@ int API::readcommand( EthernetClient client)
                 else if ( method == ArduinoHttpServer::MethodPost)
                 {
                     /*******************************************************
+                    CHANGE IP
+                    *****************************************************/
+                    if (httpRequest.getResource()[0] == "changeip")
+                    {    
+                        msg=99;
+                        JsonObject& ip_data = jsonBuffer.parseObject(data);
+
+                        if(jsondata.containsKey("ip") &&  jsondata.containsKey("gateway"))
+
+                        {
+                            if ((ip_data["ip"][0] == 10 && ip_data["dns"][0] == 10 && ip_data["gateway"][0] == 10) )
+                            {
+                                Serial.println("here");
+                                IPAddress x_ip(ip_data["ip"][0], ip_data["ip"][1], ip_data["ip"][2], ip_data["ip"][3]);
+                                IPAddress x_dns(ip_data["dns"][0], ip_data["dns"][1], ip_data["dns"][2], ip_data["dns"][3]);
+                                IPAddress x_gateway(ip_data["gateway"][0], ip_data["gateway"][1], ip_data["gateway"][2], ip_data["gateway"][3]);
+                                IPAddress x_subnet(ip_data["subnet"][0], ip_data["subnet"][1], ip_data["subnet"][2], ip_data["subnet"][3]);
+
+                                _new_ip = x_ip;
+                                _new_dns = x_dns;
+                                _new_gateway = x_gateway;
+                                _new_subnet = x_subnet;
+                                httpReply.send("{\"changeip\":\"ok\"}");
+                            }
+                        }    
+                        
+                        else
+                            httpReply.send("{\"error\":\"Please introduce unless a value for *ip* and *gateway* \"}");
+                    }
+                    /*******************************************************
                     WRITE
                     *****************************************************/
-                    if (httpRequest.getResource()[0] == "write")
+                    else if (httpRequest.getResource()[0] == "write")
                     {
                         JsonObject& jsondata = jsonBuffer.parseObject(data);
                         
@@ -195,10 +227,10 @@ int API::readcommand( EthernetClient client)
                             _jsonmultiplier = int(jsondata["multiplier"]);
 
                         if(jsondata.containsKey("frequencyA_hz"))
-                            _jsonfrequency1 = double(jsondata["frequency1"]);
+                            _jsonfrequency1 = double(jsondata["frequencyA_hz"]);
 
                         if(jsondata.containsKey("frequencyB_hz"))
-                            _jsonfrequency2 = double(jsondata["frequency2"]);
+                            _jsonfrequency2 = double(jsondata["frequencyB_hz"]);
 
                         if(jsondata.containsKey("amplitudeI"))
                         	_jsonamplitudeI=float(jsondata["amplitudeI"]);

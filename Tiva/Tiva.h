@@ -13,8 +13,13 @@ class API
   	int readcommand(EthernetClient);
   	String status_DDS();
   	int validation(double, int , double , double , float , float , float , float , int);
+  	IPAddress _new_ip;
+	IPAddress _new_dns;
+	IPAddress _new_gateway;
+	IPAddress _new_subnet;
   private:  
   	DDS* _DDS_JRO;
+  	
 };
 
 #endif
