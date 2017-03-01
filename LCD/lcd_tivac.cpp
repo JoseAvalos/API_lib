@@ -16,7 +16,7 @@ LCD::LCD(DDS* _DDS, API* _API )
 
 void LCD::init(byte addr)
 {
-    int int_delay = 40;
+  int int_delay = 40;
   writing(addr, 0x00, 0x00);//..
   delay(int_delay);
   writing(addr, 0x00, 0x38);//FUNCTION SET
