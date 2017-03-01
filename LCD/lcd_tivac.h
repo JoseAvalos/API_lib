@@ -3,23 +3,22 @@
 //libreria wire para conexión con i2c
 #include "Arduino.h"
 #include <Wire.h>
-
+#include <AD9854.h>
+#include "Tiva.h"
 //declacarión de clase lcd_tivac para instanciarlo desde el código
-class lcd_tivac
+class LCD
 {
 public:
   ///////////////// INICIO ///////////////////////
   /*En el código fuente incluir la línea (sin las comillas)
       " lcd_tivac lcd_tivac; "
   */
-  lcd_tivac();
-
   ///////////////// START ///////////////////////
   /*En el código fuente incluir la línea (sin las comillas)
       " lcd_tivac.start(direccion_i2c); "
   */
-  void start(uint8_t addr);
-
+  LCD(DDS*, API*);
+  void init(uint8_t);
   ///////////////// TEXTO ///////////////////////
   /*función entrada de texto del tipo char
     Ejemplos:
@@ -33,7 +32,7 @@ public:
     Ejemplos:
     lcd_tivac.put_num(0x01); -> imprime el número 1 en la pantalla en la posición x,y
   */
-  void put_num(byte number);
+  void put_num(byte);
 
 
   ///////////////// COMUNICACION I2C ///////////////////////
@@ -43,7 +42,7 @@ public:
       2) comando para indicar escritura o lectura de un registro de acuerdo a la configuración por defecto del dispositivo
       3) data a enviar, puede ser el registro en el cual se escribira/leera o la data a escribir
   */
-  void writing(byte my_addr, byte cmd, byte data);
+  void writing(byte, byte, byte);
 
 
   ///////////////// POSICIÓN DE CURSOR(por defecto 0,0) ///////////////////////
@@ -55,7 +54,15 @@ public:
       lcd_tivac.position(1,0); sonfigura el cursos en la esquina superior izquierda (primera celda de caracter)
       lcd_tivac.position(2,19); configura el cursor en la esquina inferior derecha (ultima celda de caracter)
   */
-  void position(int row, int col);
+  void position(int, int);
+  void clear();
+
+  void showinformation();
+
+private: 
+
+    DDS* _DDS_JRO;
+    API* _API_JRO;
 };
 
 #endif

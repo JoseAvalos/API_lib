@@ -16,20 +16,13 @@ static char *MODULATION[6] = {"None         ", "FSK          ", "Ramped FSK   ",
 
  DDS::DDS( float clock1, int CS, int UDCLK, int IO_RESET, int MRESET)
 {
-	PIN _dds_cs(CS);
-	_dds_udclk=UDCLK;
-	_dds_io_reset=IO_RESET;
-	_dds_mreset=MRESET;
-	_spi_delay=150;
+    _dds_cs = new PIN(CS);
+    _dds_udclk = new PIN(UDCLK);
+    _dds_io_reset = new PIN(IO_RESET);
+    _dds_mreset = new PIN(MRESET);
+	
+    _spi_delay=150;
     _clock=clock1;
-
-    pinMode(_power, OUTPUT);
-
-    //pinMode(_dds_cs, OUTPUT);
-    pinMode(_dds_udclk, OUTPUT);
-    pinMode(_dds_io_reset, OUTPUT);
-    pinMode(_dds_mreset, OUTPUT);
-
 }
 
 int DDS::init()
@@ -86,9 +79,9 @@ int DDS::defaultSettings()
 
 int DDS::reset()
 {
-	on(_dds_mreset);
+	_dds_mreset->on();
 	delay(1);
-	off(_dds_mreset);
+	_dds_mreset->off();
 	delay(1);
     _rf_enabled=false;
 	return 1;
@@ -96,9 +89,9 @@ int DDS::reset()
 
 int DDS::io_reset()
 {
-  	on(_dds_io_reset);
+  	_dds_io_reset->on();
   	delayMicroseconds(_spi_delay);
-  	off(_dds_io_reset);
+  	_dds_io_reset->off();
   	delayMicroseconds(_spi_delay);
 
 	return 1;
@@ -109,17 +102,18 @@ char* DDS::readData(char addr, char ndata)
     // I/O reset
     io_reset();
 
-    _dds_cs.off();
+    _dds_cs->off();
 
     //Sending serial address
-    SPI.transfer((addr & 0x0F) | 0x80);
+    SPI.transfer((addr & 0x0F) | 0x80);\
+
     for(char i = 0; i < ndata; i++)
     {
         delayMicroseconds(_spi_delay);
         read_spi_data[i] =SPI.transfer(0x00);
     }
     
-   	_dds_cs.on();
+   	_dds_cs->on();
     
     return read_spi_data;
     
@@ -142,9 +136,9 @@ int  DDS::verifyconnection()
 
 int DDS::writeData(char addr, char ndata, const char* data){
 
-    off(_dds_udclk);
+    _dds_udclk->off();
    	io_reset();
-	_dds_cs.off());
+	_dds_cs->off();
 
     SPI.transfer(addr & 0x0F);
 
@@ -154,11 +148,11 @@ int DDS::writeData(char addr, char ndata, const char* data){
         SPI.transfer(data[i]);
     }
 
-    on(_dds_cs);
+    _dds_cs->on();
     delayMicroseconds(10);
-    on(_dds_udclk);
+    _dds_udclk->on();
     delayMicroseconds(10);
-    off(_dds_udclk);
+    _dds_udclk->off();
     delayMicroseconds(10);
 	
     return 1;
@@ -207,9 +201,9 @@ int DDS::writeControlRegister(){
     //dds_updclk->output();
 	
     delayMicroseconds(100);
-    on(_dds_udclk);
+    _dds_udclk->on();
     delayMicroseconds(10);
-    off(_dds_udclk);
+    _dds_udclk->off();
     delayMicroseconds(10);
 	
     read_spi_data = readData(addr, ndata);
@@ -636,17 +630,6 @@ double DDS::binary2decimal(char* fb)
     double value=0;
     value= float(fb[0])*pow(2,40)+float(fb[1])*pow(2, 32)+float(fb[2])*pow(2, 24)+float(fb[3])*pow(2, 16)+float(fb[4])*pow(2, 8)+float(fb[5])*1;
     return value;
-}
-
-
-void DDS::on(int x) 
-{
-  digitalWrite(x, HIGH);
-}
-
-void DDS::off(int x) 
-{
-  digitalWrite(x, LOW);
 }
 
  /*

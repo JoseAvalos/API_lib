@@ -3,7 +3,7 @@
 
 #include "Energia.h"
 #include <SPI.h>
-
+#include <PinTiva.h>
 
 #define SPI_BITS 8
 #define SPI_MODE 0
@@ -48,17 +48,20 @@ class DDS{
 		double          _factor_freq2;
 		
 		//DDS I/O
-		int 			_dds_cs;
-		int 			_dds_udclk;
-		int 			_dds_io_reset;
-		int 			_dds_mreset;
+		// int 			_dds_cs;
+		// int 			_dds_udclk;
+		// int 			_dds_io_reset;
+		// int 			_dds_mreset;
 		int 			_power;
 		
 		//SPI 
 		int 			_spi_device;
 		int 			_spi_delay;
 
-			
+		PIN* 			_dds_cs;
+    	PIN* 			_dds_udclk;
+    	PIN* 			_dds_io_reset;
+    	PIN* 			_dds_mreset;		
 		// char*           cmd_answer;
 		// unsigned long   cmd_answer_len;
 		

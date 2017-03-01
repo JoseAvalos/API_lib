@@ -23,7 +23,12 @@ API::API(DDS* _DDS, IPAddress _ip, byte _mac[])
     IPAddress mydns(10, 10, 10, 1);
     IPAddress gateway(10, 10, 10, 1);
     IPAddress subnet(255, 255, 255, 0);
-    Ethernet.begin(_mac, _ip, mydns, gateway, subnet);   
+    Ethernet.begin(_mac, _ip, mydns, gateway, subnet); 
+
+     _set_ip=_ip;
+     _set_dns=mydns;
+     _set_subnet=subnet;
+     _set_gateway=gateway; 
 }
 
 int API::readcommand( EthernetClient client)
@@ -178,21 +183,43 @@ int API::readcommand( EthernetClient client)
                         msg=99;
                         JsonObject& ip_data = jsonBuffer.parseObject(data);
 
-                        if(jsondata.containsKey("ip") &&  jsondata.containsKey("gateway"))
+                        if(ip_data.containsKey("ip") &&  ip_data.containsKey("gateway"))
 
                         {
-                            if ((ip_data["ip"][0] == 10 && ip_data["dns"][0] == 10 && ip_data["gateway"][0] == 10) )
+                            if ((ip_data["ip"][0] == 10  && ip_data["gateway"][0] == 10) )
                             {
-                                Serial.println("here");
                                 IPAddress x_ip(ip_data["ip"][0], ip_data["ip"][1], ip_data["ip"][2], ip_data["ip"][3]);
-                                IPAddress x_dns(ip_data["dns"][0], ip_data["dns"][1], ip_data["dns"][2], ip_data["dns"][3]);
                                 IPAddress x_gateway(ip_data["gateway"][0], ip_data["gateway"][1], ip_data["gateway"][2], ip_data["gateway"][3]);
-                                IPAddress x_subnet(ip_data["subnet"][0], ip_data["subnet"][1], ip_data["subnet"][2], ip_data["subnet"][3]);
+                                
+                                _set_ip = x_ip;
+                                _set_gateway = x_gateway;
 
-                                _new_ip = x_ip;
-                                _new_dns = x_dns;
-                                _new_gateway = x_gateway;
-                                _new_subnet = x_subnet;
+                                if(ip_data.containsKey("dns") && ip_data["dns"][0] == 10 )
+                                {
+                                    IPAddress x_dns(ip_data["dns"][0], ip_data["dns"][1], ip_data["dns"][2], ip_data["dns"][3]);
+                                    _set_dns = x_dns;
+                                }
+
+                                else
+                                {
+                                    IPAddress x_dns(10, 10, 10, 1);
+                                    _set_dns = x_dns;
+                                }
+
+
+                                if(ip_data.containsKey("subnet") )
+                                {
+                                    IPAddress x_subnet(ip_data["subnet"][0], ip_data["subnet"][1], ip_data["subnet"][2], ip_data["subnet"][3]);
+                                    _set_subnet = x_subnet;
+                                }
+
+                                else
+                                {
+                                    IPAddress x_subnet(255, 255, 255, 0);
+                                    _set_subnet = x_subnet;
+                                }
+
+
                                 httpReply.send("{\"changeip\":\"ok\"}");
                             }
                         }    

@@ -1,3 +1,4 @@
+#include "PinTiva.h"
 #include "Energia.h"
 
 PIN::PIN (int port)
@@ -8,10 +9,10 @@ PIN::PIN (int port)
 
 int PIN::on()
 {
-	digitalWrite(_port, HIGH)
+	digitalWrite(_port, HIGH);
 }
 
 int PIN::off()
 {
-  digitalWrite(_port, LOW)
+  digitalWrite(_port, LOW);
 }
