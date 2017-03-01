@@ -386,57 +386,39 @@ int API::validation(double _vclock, int _vmultiplier, double _vfrequency1, doubl
                                     }
 
                                     else
-                                    {
                                         json_WRITE_ERROR="{\"error\":\"Introduce a phaseA between 0 and 1 \"}";
-                                    }
                                 }
 
                                 else
-                                {
                                     json_WRITE_ERROR="{\"error\":\"Introduce a phaseA between 0 and 1 \"}";
-                                } 
                             }
 
                             else
-                            {
                                 json_WRITE_ERROR="{\"error\":\"Introduce an amplitudeQ between 0 and 1 \"}";
-                            }
                         }
 
                         else
-                        {
                             json_WRITE_ERROR="{\"error\":\"Introduce an amplitudeI between 0 and 1 \"}";
-                        }
                     }
 
                     else
-                    {
                         json_WRITE_ERROR="{\"error\":\"Introduce a correct frequency2 \"}";
-                    }
                 }
 
                 else
-                {
                     json_WRITE_ERROR="{\"error\":\"Introduce a correct frequency1 \"}";
-                }
             }
 
             else
-            {
                 json_WRITE_ERROR="{\"error\":\"Introduce a modulation case \"}";
-            }
         }
 
         else
-        {
             json_WRITE_ERROR="{\"error\":\"Introduce a multiplier value from 4 to 20 or 1 \"}";
-        }
     }
 
     else
-    {
         json_WRITE_ERROR="{\"error\":\"Introduce a clock less than 300000000 \"}";
-    }
 
     return sucess;
 }

@@ -1,6 +1,7 @@
 #include "AD9854.h"
 #include <Energia.h>
 #include <SPI.h>
+#include <PinTiva.h>
 
 static char controlRegister[4];
 static char read_spi_data[6];
@@ -15,7 +16,7 @@ static char *MODULATION[6] = {"None         ", "FSK          ", "Ramped FSK   ",
 
  DDS::DDS( float clock1, int CS, int UDCLK, int IO_RESET, int MRESET)
 {
-	_dds_cs=CS;
+	PIN _dds_cs(CS);
 	_dds_udclk=UDCLK;
 	_dds_io_reset=IO_RESET;
 	_dds_mreset=MRESET;
@@ -24,7 +25,7 @@ static char *MODULATION[6] = {"None         ", "FSK          ", "Ramped FSK   ",
 
     pinMode(_power, OUTPUT);
 
-    pinMode(_dds_cs, OUTPUT);
+    //pinMode(_dds_cs, OUTPUT);
     pinMode(_dds_udclk, OUTPUT);
     pinMode(_dds_io_reset, OUTPUT);
     pinMode(_dds_mreset, OUTPUT);
@@ -34,7 +35,7 @@ static char *MODULATION[6] = {"None         ", "FSK          ", "Ramped FSK   ",
 int DDS::init()
 {
 
-    _ctrlreg_multiplier = 4;        	// Multiplier 4- 20
+    _ctrlreg_multiplier = 1;        	// Multiplier 4- 20
     _ctrlreg_mode = 0;              	// Single, FSK, Ramped FSK, Chirp, BPSK
     
     _ctrlreg_qdac_pwdn = 0;         	// QDAC power down enabled: 0 -> disable
@@ -108,7 +109,7 @@ char* DDS::readData(char addr, char ndata)
     // I/O reset
     io_reset();
 
-    off(_dds_cs);
+    _dds_cs.off();
 
     //Sending serial address
     SPI.transfer((addr & 0x0F) | 0x80);
@@ -118,7 +119,7 @@ char* DDS::readData(char addr, char ndata)
         read_spi_data[i] =SPI.transfer(0x00);
     }
     
-   	on(_dds_cs);
+   	_dds_cs.on();
     
     return read_spi_data;
     
@@ -143,7 +144,7 @@ int DDS::writeData(char addr, char ndata, const char* data){
 
     off(_dds_udclk);
    	io_reset();
-	off(_dds_cs);
+	_dds_cs.off());
 
     SPI.transfer(addr & 0x0F);
 
