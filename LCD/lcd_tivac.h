@@ -1,62 +1,63 @@
 #ifndef lcd_tivac_h
 #define lcd_tivac_h
-//libreria wire para conexión con i2c
+
 #include "Arduino.h"
 #include <Wire.h>
 #include <AD9854.h>
 #include "Tiva.h"
-//declacarión de clase lcd_tivac para instanciarlo desde el código
+
+//!  Clase LCD. 
+/*!
+  Esta clase contiene las funciones que permitan usar la interface LCD con la informacion del DDS.
+*/
+
 class LCD
 {
-public:
-  ///////////////// INICIO ///////////////////////
-  /*En el código fuente incluir la línea (sin las comillas)
-      " lcd_tivac lcd_tivac; "
-  */
-  ///////////////// START ///////////////////////
-  /*En el código fuente incluir la línea (sin las comillas)
-      " lcd_tivac.start(direccion_i2c); "
-  */
-  LCD(DDS*, API*);
-  void init(uint8_t);
-  ///////////////// TEXTO ///////////////////////
-  /*función entrada de texto del tipo char
-    Ejemplos:
-    lcd_tivac.text("Hola mundo");
-  */
+  public:
+  //! Constructor LCD.
+      /*!
+        \param _LCD_DDS incluye el puntero de la variable externa del DDS.
+        \param _LCD_API incluye el puntero de la variable externa del API.
+      */
+  LCD(DDS* _LCD_DDS, API* _LCD_API);
+
+  //! Función para iniciar la comunicacion I2C, estaba se debe ubicar en main.
+      /*!
+        \param my_addr_lcd Para el LCD JRO 0x30.
+      */
+  void init(uint8_t my_addr_lcd);
+
+  //! Función entrada de texto para el LCD.
+      /*!
+        \param input[] incluye el mensaje a reproducir como "Hola mundo".
+      */
   void text(char input[]);
 
+  //! Función entrada de numeral byte para el LCD.
+    /*!
+      \param number incluye el valor HEX a reproducir en el LCD.
+    */
+  void put_num(byte number);
 
-  ///////////////// NUMEROS 0 - 255 ///////////////////////
-  /*funcion para colocar números de variables del tipo byte y uint8
-    Ejemplos:
-    lcd_tivac.put_num(0x01); -> imprime el número 1 en la pantalla en la posición x,y
-  */
-  void put_num(byte);
+  //! Función general de comunicacion I2C con el LCD.
+    /*!
+      \param my_addr direccion del LCD.
+      \param  cmd funcion del LCD.
+      \param  data informacion a enviar.
+    */
+  void writing(byte my_addr, byte cmd, byte data);
 
+  //! Función entrada para colocar la posicion del LCD.
+    /*!
+      \param row 1, 2.
+      \param col 0-19
+    */
+  void position(int row, int col);
 
-  ///////////////// COMUNICACION I2C ///////////////////////
-  /*función para escribir a través de i2c en los registros de cualquier dispositivo i2c
-    requisitos:
-      1) definir la dirección del dispositivo
-      2) comando para indicar escritura o lectura de un registro de acuerdo a la configuración por defecto del dispositivo
-      3) data a enviar, puede ser el registro en el cual se escribira/leera o la data a escribir
-  */
-  void writing(byte, byte, byte);
-
-
-  ///////////////// POSICIÓN DE CURSOR(por defecto 0,0) ///////////////////////
-  /*función para definir la posición del cursor, donde:
-    row = 1, 2
-    col = 0 - 19
-
-    Ejemplo:
-      lcd_tivac.position(1,0); sonfigura el cursos en la esquina superior izquierda (primera celda de caracter)
-      lcd_tivac.position(2,19); configura el cursor en la esquina inferior derecha (ultima celda de caracter)
-  */
-  void position(int, int);
+  //! Función para limpiar la pantalla LCD.
   void clear();
 
+  //! Función que reproduce la informacion en el LCD.
   void showinformation();
 
 private: 

@@ -397,9 +397,9 @@ int API::validation(double _vclock, int _vmultiplier, double _vfrequency1, doubl
         {
             if(_vmode>=0 && _vmode <=5)
             {
-                if( _vfrequency1 <= _DDS_JRO->getclock() * _DDS_JRO->getMultiplier() * 0.5)
+                if( _vfrequency1 <= _DDS_JRO->getclock() * _vmultiplier * 0.5)
                 {
-                    if( _vfrequency2 <= _DDS_JRO->getclock() * _DDS_JRO->getMultiplier() * 0.5)
+                    if( _vfrequency2 <= _DDS_JRO->getclock() * _vmultiplier * 0.5)
                     {
                         if( _vamplitudeI <= 1 && _vamplitudeI >=0)
                         {
